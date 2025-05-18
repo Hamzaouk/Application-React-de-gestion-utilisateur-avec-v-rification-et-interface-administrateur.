@@ -7,18 +7,18 @@ import { toast } from "react-toastify";
 
 const Login = () => {
   const navigate = useNavigate();
-
   const { backendUrl, setIsLoggedin, getUserData } = useContext(AppContext);
-
   const [state, setState] = useState("Sign Up");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const onSubmitHandler = async (e) => {
     try {
       e.preventDefault();
-
+      setLoading(true);
+      
       axios.defaults.withCredentials = true;
 
       if (state === "Sign Up") {
@@ -32,6 +32,7 @@ const Login = () => {
           setIsLoggedin(true);
           getUserData();
           navigate("/");
+          toast.success("Account created successfully!");
         } else {
           toast.error(data.message);
         }
@@ -45,104 +46,140 @@ const Login = () => {
           setIsLoggedin(true);
           getUserData();
           navigate("/");
+          toast.success("Login successful!");
         } else {
           toast.error(data.message);
         }
       }
     } catch (error) {
       toast.error(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen px-6 sm:px-0 bg-gradient-to-br from-blue-200 to-purple-400">
-      <img
-        onClick={() => navigate("/")}
-        src={assets.logo}
-        alt="logo"
-        className="absolute left-5 sm:left-20 top-5 w-28 sm:w-32 cursor-pointer"
-      />
-      <div className="bg-slate-900 p-10 rounded-lg shadow-lg w-full sm:w-96 text-indigo-300 text-sm">
-        <h2 className="text-3xl font-semibold text-white text-center mb-3">
-          {state === "Sign Up" ? "Create Account" : "Login"}
-        </h2>
+    <div className="min-h-screen w-full flex items-center justify-center p-4 relative bg-gradient-to-br from-indigo-900 via-purple-900 to-blue-900">
+      {/* Background decorative elements */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-purple-500 opacity-20 blur-3xl"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full bg-blue-500 opacity-20 blur-3xl"></div>
+      </div>
+      
+      <div className="absolute top-6 left-6 z-10">
+        <img
+          onClick={() => navigate("/")}
+          src={assets.logo}
+          alt="logo"
+          className="w-28 sm:w-32 cursor-pointer"
+        />
+      </div>
+      
+      <div className="w-full max-w-md z-10">
+        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
+          <div className="p-8">
+            <h2 className="text-3xl font-bold text-gray-800 text-center">
+              {state === "Sign Up" ? "Create Account" : "Welcome Back"}
+            </h2>
+            
+            <p className="text-center text-gray-600 mt-2 mb-8">
+              {state === "Sign Up"
+                ? "Join us today and start your journey"
+                : "Login to continue your journey"}
+            </p>
 
-        <p className="text-center text-sm mb-6">
-          {state === "Sign Up"
-            ? "Create your account"
-            : "Login to your account!"}
-        </p>
+            <form onSubmit={onSubmitHandler} className="space-y-6">
+              {state === "Sign Up" && (
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <img src={assets.person_icon} alt="person" className="w-5 h-5" />
+                  </div>
+                  <input
+                    onChange={(e) => setName(e.target.value)}
+                    value={name}
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-gray-50"
+                    type="text"
+                    placeholder="Full Name"
+                    required
+                  />
+                </div>
+              )}
+              
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <img src={assets.mail_icon} alt="email" className="w-5 h-5" />
+                </div>
+                <input
+                  onChange={(e) => setEmail(e.target.value)}
+                  value={email}
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-gray-50"
+                  type="email"
+                  placeholder="Email address"
+                  required
+                />
+              </div>
+              
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <img src={assets.lock_icon} alt="password" className="w-5 h-5" />
+                </div>
+                <input
+                  onChange={(e) => setPassword(e.target.value)}
+                  value={password}
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-gray-50"
+                  type="password"
+                  placeholder="Password"
+                  required
+                />
+              </div>
 
-        <form onSubmit={onSubmitHandler}>
-          {state === "Sign Up" && (
-            <div className="mb-4 flex items-center gap-3 w-full px-5 py-2.5 rounded-full bg-[#333A5C]">
-              <img src={assets.person_icon} alt="person_icon" />
-              <input
-                onChange={(e) => setName(e.target.value)}
-                value={name}
-                className="bg-transparent outline-none"
-                type="text"
-                placeholder="Full Name"
-                required
-              />
+              {state === "Login" && (
+                <div className="text-right">
+                  <button
+                    type="button"
+                    onClick={() => navigate("/reset-password")}
+                    className="text-indigo-600 hover:text-indigo-800 text-sm font-medium"
+                  >
+                    Forgot password?
+                  </button>
+                </div>
+              )}
+
+              <button
+                disabled={loading}
+                className={`w-full py-3 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium shadow-md hover:shadow-lg transform transition-all duration-300 hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 ${
+                  loading ? "opacity-70 cursor-not-allowed" : ""
+                }`}
+              >
+                {loading ? "Processing..." : state}
+              </button>
+            </form>
+
+            <div className="mt-8 text-center">
+              {state === "Sign Up" ? (
+                <p className="text-gray-600">
+                  Already have an account?{" "}
+                  <button
+                    onClick={() => setState("Login")}
+                    className="text-indigo-600 font-medium hover:text-indigo-800"
+                  >
+                    Log in
+                  </button>
+                </p>
+              ) : (
+                <p className="text-gray-600">
+                  Don't have an account?{" "}
+                  <button
+                    onClick={() => setState("Sign Up")}
+                    className="text-indigo-600 font-medium hover:text-indigo-800"
+                  >
+                    Sign up
+                  </button>
+                </p>
+              )}
             </div>
-          )}
-          <div className="mb-4 flex items-center gap-3 w-full px-5 py-2.5 rounded-full bg-[#333A5C]">
-            <img src={assets.mail_icon} alt="mail_icon" />
-            <input
-              onChange={(e) => setEmail(e.target.value)}
-              value={email}
-              className="bg-transparent outline-none"
-              type="email"
-              placeholder="Email id"
-              required
-            />
           </div>
-          <div className="mb-4 flex items-center gap-3 w-full px-5 py-2.5 rounded-full bg-[#333A5C]">
-            <img src={assets.lock_icon} alt="lock_icon" />
-            <input
-              onChange={(e) => setPassword(e.target.value)}
-              value={password}
-              className="bg-transparent outline-none"
-              type="password"
-              placeholder="Password"
-              required
-            />
-          </div>
-
-          <p
-            onClick={() => navigate("/reset-password")}
-            className="mb-4 text-indigo-500 cursor-pointer"
-          >
-            Forgot password?
-          </p>
-
-          <button className="w-full py-2.5 rounded-full bg-gradient-to-r from-indigo-500 to-indigo-900 text-white font-medium">
-            {state}
-          </button>
-        </form>
-
-        {state === "Sign Up" ? (
-          <p className="text-gray-400 text-center text-xs mt-4">
-            Already have an account?{" "}
-            <span
-              onClick={() => setState("Login")}
-              className="text-blue-400 cursor-pointer underline"
-            >
-              Login here
-            </span>
-          </p>
-        ) : (
-          <p className="text-gray-400 text-center text-xs mt-4">
-            Don't have an account?{" "}
-            <span
-              onClick={() => setState("Sign Up")}
-              className="text-blue-400 cursor-pointer underline"
-            >
-              Sign up
-            </span>
-          </p>
-        )}
+        </div>
       </div>
     </div>
   );
